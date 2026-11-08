@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>PC Remote</string>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>PC Remote talks to your PC on your home Wi-Fi to wake it, put it to sleep and open apps.</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+        <!-- The agent speaks plain HTTP on the Tailscale address (100.x.x.x),
+             which iOS does not treat as "local", so allow it explicitly. -->
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+</dict>
+</plist>

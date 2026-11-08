@@ -1,0 +1,12 @@
+# secrets and local state
+agent/config.json
+ios/Sources/PCRemote/Secrets.swift
+*.log
+
+# build output
+ios/xtool/
+ios/.xtool-tmp/
+ios/.build/
+__pycache__/
+*.pyc
+.DS_Store

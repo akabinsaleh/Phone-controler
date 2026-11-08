@@ -1,0 +1,4 @@
+version: 1
+bundleID: com.zzazi.PCRemote
+infoPath: Info.plist
+iconPath: Resources/AppIcon.png

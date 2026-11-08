@@ -1,0 +1,86 @@
+{
+  "port": 8765,
+  "token": "PUT-A-LONG-RANDOM-TOKEN-HERE",
+  "apps": {
+    "Discord": {
+      "cmd": [
+        "C:\\Users\\zzazi\\AppData\\Local\\Discord\\Update.exe",
+        "--processStart",
+        "Discord.exe"
+      ],
+      "process": [
+        "Discord.exe"
+      ]
+    },
+    "Chrome": {
+      "cmd": [
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+      ],
+      "process": [
+        "chrome.exe"
+      ]
+    },
+    "Minecraft Bedrock": {
+      "cmd": [
+        "explorer.exe",
+        "shell:AppsFolder\\Microsoft.MinecraftUWP_8wekyb3d8bbwe!Game"
+      ],
+      "process": [
+        "Minecraft.Windows.exe"
+      ]
+    },
+    "Minecraft Launcher": {
+      "cmd": [
+        "explorer.exe",
+        "shell:AppsFolder\\Microsoft.4297127D64EC6_8wekyb3d8bbwe!Minecraft"
+      ],
+      "process": [
+        "Minecraft.exe",
+        "MinecraftLauncher.exe"
+      ]
+    },
+    "Study Mode": {
+      "cmds": [
+        [
+          "explorer.exe",
+          "shell:AppsFolder\\OpenAI.Codex_2p2nqsd0c76g0!App"
+        ],
+        [
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+          "https://lms.yu.edu.sa/course/view.php?id=16767"
+        ],
+        [
+          "C:\\Users\\zzazi\\AppData\\Local\\Discord\\Update.exe",
+          "--processStart",
+          "Discord.exe"
+        ]
+      ],
+      "process": [
+        "ChatGPT.exe"
+      ]
+    },
+    "Coding Mode": {
+      "cmds": [
+        [
+          "explorer.exe",
+          "shell:AppsFolder\\Claude_pzs8sxrjxfjjc!Claude"
+        ],
+        [
+          "C:\\Users\\zzazi\\AppData\\Local\\Programs\\Ollama\\ollama app.exe"
+        ],
+        [
+          "C:\\Program Files\\Apache NetBeans\\bin\\netbeans64.exe"
+        ]
+      ],
+      "process": [
+        "netbeans64.exe",
+        "java.exe"
+      ]
+    }
+  },
+  "afk": {
+    "minutes": 30,
+    "repeat_minutes": 120,
+    "ntfy_topic": "pcremote-CHANGE-ME"
+  }
+}

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>PC Remote</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: dark; --bg:#000; --card:#1c1c1e; --card2:#2c2c2e; --text:#fff; --muted:#8e8e93; --blue:#0a84ff; --green:#30d158; --red:#ff453a; --orange:#ff9f0a; --indigo:#5e5ce6; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--bg); color:var(--text); font:17px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding:env(safe-area-inset-top) 16px 40px; }
+  h1 { font-size:34px; margin:24px 0 12px; }
+  h2 { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 8px 16px; font-weight:400; }
+  .card { background:var(--card); border-radius:12px; overflow:hidden; }
+  .row { display:flex; align-items:center; gap:12px; padding:12px 16px; min-height:48px; }
+  .row + .row { border-top:1px solid #38383a; }
+  .row .grow { flex:1; min-width:0; }
+  .row .sub { color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dot { width:12px; height:12px; border-radius:50%; background:var(--red); flex:none; }
+  .dot.on { background:var(--green); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .big { border:0; border-radius:12px; padding:20px 0; font:inherit; font-weight:600; color:#fff; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; }
+  .big svg { width:28px; height:28px; }
+  .big:disabled { opacity:.35; cursor:default; }
+  .btn { border:0; border-radius:8px; padding:8px 12px; font:inherit; font-size:15px; color:#fff; background:var(--card2); cursor:pointer; }
+  .btn.red { background:var(--red); }
+  .btn.blue { background:var(--blue); }
+  .tiles { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .tile { background:var(--card); border-radius:12px; padding:12px; }
+  .tile .k { color:var(--muted); font-size:12px; }
+  .tile .v { font-weight:600; font-size:15px; margin-top:4px; }
+  .msg { color:var(--muted); font-size:13px; padding:12px 16px; }
+  input { width:100%; font:inherit; padding:12px; border-radius:10px; border:1px solid #38383a; background:var(--card2); color:#fff; }
+  .meter { height:6px; background:#38383a; border-radius:3px; margin-top:6px; overflow:hidden; }
+  .meter i { display:block; height:100%; background:var(--green); }
+  .hidden { display:none; }
+  a.link { color:var(--blue); text-decoration:none; }
+  .top { display:flex; justify-content:space-between; align-items:center; }
+  .running { color:var(--green); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="top"><h1>PC Remote</h1><button class="btn" id="toggleStats">Stats</button></div>
+
+<div id="login" class="card hidden">
+  <div class="row" style="flex-direction:column; align-items:stretch; gap:8px">
+    <div>Enter the token from <code>config.json</code> on the PC.</div>
+    <input id="tokenInput" type="password" placeholder="Token" autocomplete="off">
+    <button class="btn blue" id="saveToken">Save</button>
+  </div>
+</div>
+
+<div id="main">
+  <div class="card">
+    <div class="row">
+      <span class="dot" id="dot"></span>
+      <span class="grow" id="stateText" style="font-weight:600">Offline</span>
+      <span class="sub" id="pcName"></span>
+    </div>
+  </div>
+
+  <div class="tiles" id="tiles" style="margin-top:12px"></div>
+
+  <h2>Power</h2>
+  <div class="grid">
+    <button class="big" style="background:var(--indigo)" id="sleepBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Sleep</button>
+    <button class="big" style="background:var(--red)" id="restartBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>Restart</button>
+    <button class="big" style="background:var(--card2)" id="micBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg><span id="micLabel">Microphone</span></button>
+    <button class="big" style="background:var(--card2)" id="camBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><span id="camLabel">Camera</span></button>
+    <button class="big" style="background:var(--orange)" id="closeAllBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9l6 6M15 9l-6 6"/></svg>Close all apps</button>
+  </div>
+
+  <h2>Apps</h2>
+  <div class="card" id="apps"><div class="msg">Loading…</div></div>
+
+  <h2>Open on the PC</h2>
+  <div class="card" id="windows"><div class="msg">—</div></div>
+
+  <div class="msg" id="message"></div>
+</div>
+
+<div id="stats" class="hidden"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let token = localStorage.getItem('pcremote.token') || '';
+let online = false, apps = [], timer = null, statsMode = false;
+
+function headers() { return { 'X-Token': token }; }
+async function api(path, method = 'GET') {
+  const r = await fetch(path, { method, headers: headers(), cache: 'no-store' });
+  if (r.status === 401) { showLogin(); throw new Error('bad token'); }
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+function showLogin() { $('#login').classList.remove('hidden'); $('#main').classList.add('hidden'); }
+function hideLogin() { $('#login').classList.add('hidden'); $('#main').classList.remove('hidden'); }
+function setMsg(t) { $('#message').textContent = t; }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const fmt = (n, d = 1) => Number(n).toFixed(d).replace(/\.0$/, '');
+function uptime(s) { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h >= 24 ? `${Math.floor(h/24)}d ${h%24}h ${m}m` : `${h}h ${m}m`; }
+
+$('#saveToken').onclick = () => { token = $('#tokenInput').value.trim(); localStorage.setItem('pcremote.token', token); hideLogin(); refresh(); };
+$('#toggleStats').onclick = () => { statsMode = !statsMode; $('#toggleStats').textContent = statsMode ? 'Back' : 'Stats'; $('#stats').classList.toggle('hidden', !statsMode); $('#main').classList.toggle('hidden', statsMode); refresh(); };
+$('#sleepBtn').onclick = () => act('/sleep', 'PC is going to sleep.');
+$('#restartBtn').onclick = () => confirm('Restart the PC? All apps close and it comes back in about a minute.') && act('/restart', 'PC is restarting.');
+$('#closeAllBtn').onclick = () => confirm('Close every open app on the PC? Unsaved work is lost.') && act('/close-all', 'Closing all apps.');
+$('#micBtn').onclick = async () => { await act('/mic/toggle', 'Microphone toggled.'); refresh(); };
+$('#camBtn').onclick = async () => { await act('/camera/toggle', 'Camera toggled.'); refresh(); };
+
+async function act(path, okMsg) {
+  try { await api(path, 'POST'); setMsg(okMsg); } catch (e) { setMsg('Failed: ' + e.message); }
+}
+
+function setOnline(on, name) {
+  online = on;
+  $('#dot').classList.toggle('on', on);
+  $('#stateText').textContent = on ? 'Online' : 'Offline';
+  $('#pcName').textContent = on ? name : '';
+  for (const id of ['sleepBtn', 'restartBtn', 'closeAllBtn', 'micBtn', 'camBtn']) $('#' + id).disabled = !on;
+}
+
+function renderCamera(s) {
+  const b = $('#camBtn');
+  if (s.camera_enabled === null || s.camera_enabled === undefined) { b.disabled = true; $('#camLabel').textContent = 'Camera n/a'; return; }
+  b.style.background = s.camera_enabled ? 'var(--green)' : 'var(--red)';
+  $('#camLabel').textContent = s.camera_enabled ? 'Camera on' : 'Camera off';
+}
+
+function renderMic(s) {
+  const b = $('#micBtn');
+  if (s.mic_muted === null || s.mic_muted === undefined) { b.disabled = true; $('#micLabel').textContent = 'No microphone'; return; }
+  b.style.background = s.mic_muted ? 'var(--red)' : 'var(--green)';
+  $('#micLabel').textContent = s.mic_muted ? 'Mic off' : 'Mic on';
+}
+
+function renderTiles(s) {
+  $('#tiles').innerHTML = `
+    <div class="tile"><div class="k">CPU</div><div class="v">${Math.round(s.cpu)}%</div></div>
+    <div class="tile"><div class="k">RAM</div><div class="v">${fmt(s.ram_used_gb)} / ${fmt(s.ram_total_gb)} GB</div></div>
+    <div class="tile"><div class="k">On for</div><div class="v">${uptime(s.uptime_s)}</div></div>
+    <div class="tile"><div class="k">Idle</div><div class="v">${(s.idle_s || 0) < 60 ? 'active' : Math.floor(s.idle_s / 60) + ' min'}</div></div>`;
+}
+
+function renderApps(s) {
+  if (!apps.length) { $('#apps').innerHTML = '<div class="msg">No apps configured.</div>'; return; }
+  $('#apps').innerHTML = apps.map(a => {
+    const running = s.running.includes(a);
+    return `<div class="row"><span class="grow">${esc(a)}</span>
+      ${running ? '<span class="running">Running</span>' : ''}
+      <button class="btn blue" data-launch="${esc(a)}">Open</button>
+      ${running ? `<button class="btn red" data-close="${esc(a)}">End</button>` : ''}</div>`;
+  }).join('');
+  $('#apps').querySelectorAll('[data-launch]').forEach(b => b.onclick = () => act('/launch/' + encodeURIComponent(b.dataset.launch), 'Opened ' + b.dataset.launch + '.'));
+  $('#apps').querySelectorAll('[data-close]').forEach(b => b.onclick = () => act('/close/' + encodeURIComponent(b.dataset.close), 'Closed ' + b.dataset.close + '.'));
+}
+
+function renderWindows(s) {
+  if (!s.windows.length) { $('#windows').innerHTML = '<div class="msg">Nothing open.</div>'; return; }
+  $('#windows').innerHTML = s.windows.map(w => `<div class="row"><div class="grow"><div>${esc(w.app)}</div><div class="sub">${esc(w.title)}</div></div><button class="btn red" data-hwnd="${w.hwnd}">End</button></div>`).join('');
+  $('#windows').querySelectorAll('[data-hwnd]').forEach(b => b.onclick = () => act('/close-window/' + b.dataset.hwnd, 'Closed window.'));
+}
+
+function meter(label, value, max, text) {
+  const pct = max ? Math.min(100, value / max * 100) : 0;
+  const color = pct > 85 ? 'var(--red)' : pct > 60 ? 'var(--orange)' : 'var(--green)';
+  return `<div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;justify-content:space-between"><span>${esc(label)}</span><span class="sub">${esc(text)}</span></div><div class="meter"><i style="width:${pct}%;background:${color}"></i></div></div>`;
+}
+
+function renderStats(s) {
+  const rate = k => k >= 1024 ? fmt(k / 1024) + ' MB/s' : Math.round(k) + ' KB/s';
+  let h = '<h2>CPU</h2><div class="card">' + meter('Total', s.cpu, 100, Math.round(s.cpu) + '%')
+    + `<div class="row"><span class="grow">Cores</span><span class="sub">${s.cpu_cores} cores / ${s.cpu_threads} threads · ${s.cpu_mhz} MHz</span></div>`
+    + s.cpu_per_core.map((p, i) => meter('Core ' + (i + 1), p, 100, Math.round(p) + '%')).join('') + '</div>';
+  h += '<h2>Memory</h2><div class="card">' + meter('RAM', s.ram_used_gb, s.ram_total_gb, `${fmt(s.ram_used_gb)} / ${fmt(s.ram_total_gb)} GB`) + meter('Swap', s.swap_used_gb, s.swap_total_gb, `${fmt(s.swap_used_gb)} / ${fmt(s.swap_total_gb)} GB`) + '</div>';
+  if (s.gpu) h += '<h2>GPU</h2><div class="card">' + `<div class="row"><span class="grow">${esc(s.gpu.name)}</span><span class="sub">${Math.round(s.gpu.temp_c)} °C</span></div>` + meter('Usage', s.gpu.util, 100, Math.round(s.gpu.util) + '%') + meter('VRAM', s.gpu.mem_used_gb, s.gpu.mem_total_gb, `${fmt(s.gpu.mem_used_gb)} / ${fmt(s.gpu.mem_total_gb)} GB`) + '</div>';
+  h += '<h2>Disks</h2><div class="card">' + s.disks.map(d => meter(d.name, d.used_gb, d.total_gb, `${fmt(d.used_gb)} / ${fmt(d.total_gb)} GB`)).join('') + '</div>';
+  h += '<h2>Network</h2><div class="card">'
+    + `<div class="row"><span class="grow">Download</span><span class="sub">${rate(s.net_down_kbps)}</span></div>`
+    + `<div class="row"><span class="grow">Upload</span><span class="sub">${rate(s.net_up_kbps)}</span></div>`
+    + `<div class="row"><span class="grow">Since boot</span><span class="sub">↓ ${fmt(s.net_recv_gb)} GB · ↑ ${fmt(s.net_sent_gb)} GB</span></div></div>`;
+  h += '<h2>System</h2><div class="card">' + `<div class="row"><span class="grow">Uptime</span><span class="sub">${uptime(s.uptime_s)}</span></div><div class="row"><span class="grow">Processes</span><span class="sub">${s.process_count}</span></div></div>`;
+  h += '<h2>Top by CPU</h2><div class="card">' + s.top_cpu.map(p => `<div class="row"><span class="grow">${esc(p.name)}</span><span class="sub">${fmt(p.cpu)}%</span></div>`).join('') + '</div>';
+  h += '<h2>Top by memory</h2><div class="card">' + s.top_mem.map(p => `<div class="row"><span class="grow">${esc(p.name)}</span><span class="sub">${p.mem_mb} MB</span></div>`).join('') + '</div>';
+  $('#stats').innerHTML = h;
+}
+
+async function refresh() {
+  if (!token) { showLogin(); return; }
+  try {
+    if (statsMode) { renderStats(await api('/stats')); return; }
+    const s = await api('/status');
+    if (!apps.length) apps = (await api('/apps')).apps;
+    setOnline(true, s.name);
+    renderTiles(s); renderMic(s); renderCamera(s); renderApps(s); renderWindows(s);
+  } catch (e) {
+    if (e.message !== 'bad token') { setOnline(false, ''); $('#tiles').innerHTML = ''; }
+  }
+}
+
+refresh();
+timer = setInterval(() => { if (!document.hidden) refresh(); }, 3000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+</script>
+</body>
+</html>
